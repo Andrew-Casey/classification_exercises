@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from pydataset import data
 import os
-
+import env
 
 
 # get db url
@@ -11,114 +11,55 @@ def get_db_url(database, user=env.user, password=env.password, host_name=env.hos
     url = f'mysql+pymysql://{user}:{password}@{host_name}/{database}'
     return url
 
-#get titanic
-#SQL_query = 'select * from passengers'
-#directory = '/Users/andrewcasey/codeup-data-science/classification_exercises'
-def new_titanic_data(SQL_query):
-    '''
-    - This function will:
-    - take in a sql query
-    - create a connect_url to mySQL
-    - return a df of the given query from the titanic_db
-    '''
-    url = get_db_url('titanic_db')
-    
-    return pd.read_sql(SQL_query, url)
 
-#
-def get_titanic_data(SQL_query, directory, filename='titanic.csv'):
-    '''
-    this function will:
-    -check local directory for csv file
-     -return if exists
-    -if csv doesn't exist:
-     -create a df of the SQL_query
-     -write df to csv
-    -output titanic df
-    '''
-    if os.path.exists(directory + filename):
-        df = pd.read_csv(filename)
-        return df
-    else:
-        df = new_titanic_data(SQL_query)
-        
-        #want to save to csv
-        df.to_csv(filename)
-        return df
+def check_file_exists(fn, query, url):
+    """
+    check if file exists in my local directory, if not, pull from sql db
+    return dataframe
+    """
+    if os.path.isfile(fn):
+        print('csv file found and loaded')
+        return pd.read_csv(fn, index_col=0)
+    else: 
+        print('creating df and exporting csv')
+        df = pd.read_sql(query, url)
+        df.to_csv(fn)
+        return df 
 
-# get iris
-def new_iris_data(SQL_query):
-    '''
-    - This function will:
-    - take in a sql query
-    - create a connect_url to mySQL
-    - return a df of the given query from the iris_db
-    '''
-    url = get_db_url('iris_db')
-    
-    return pd.read_sql(SQL_query, url)
+def get_titanic_data():
+    url = env.get_db_url('titanic_db')
+    filename = 'titanic.csv'
+    query = 'select * from passengers'
 
-#SQL_query = """select * 
-                    #from species 
-                    #join measurements using (species_id)"""
-#directory = '/Users/andrewcasey/codeup-data-science/classification_exercises'
+    df = check_file_exists(filename, query, url)
 
-def get_iris_data(SQL_query, directory, filename='iris.csv'):
-    '''
-    this function will:
-    -check local directory for csv file
-     -return if exists
-    -if csv doesn't exist:
-     -create a df of the SQL_query
-     -write df to csv
-    -output titanic df
-    '''
-    if os.path.exists(directory + filename):
-        df = pd.read_csv(filename)
-        return df
-    else:
-        df = new_iris_data(SQL_query)
-        
-        #want to save to csv
-        df.to_csv(filename)
-        return df
+    return df 
+
+def get_iris_data():
+    url = env.get_db_url('iris_db')
+    query = '''
+            select * from measurements
+                join species
+                    using (species_id)
+            '''
+    filename = 'iris.csv'
+    df = check_file_exists(filename, query, url)
+    return df
 
 
-#telco churn
-def new_telco_churn(SQL_query):
-    '''
-    - This function will:
-    - take in a sql query
-    - create a connect_url to mySQL
-    - return a df of the given query from the telco_churn
-    '''
-    url = get_db_url('telco_churn')
-    
-    return pd.read_sql(SQL_query, url)
+def get_telco_churn():
+    url = env.get_db_url('telco_churn')
+    query = ''' select * from customers
+	join contract_types
+		using (contract_type_id)
+	join internet_service_types
+		using (internet_service_type_id)
+	join payment_types
+		using (payment_type_id)
+        '''
+    filename = 'telco.csv'
+    df = check_file_exists(filename, query, url)
 
-def get_telco_churn(SQL_query, directory, filename='telco.csv'):
-    '''
-    this function will:
-    -check local directory for csv file
-     -return if exists
-    -if csv doesn't exist:
-     -create a df of the SQL_query
-     -write df to csv
-    -output titanic df
-    '''
-    if os.path.exists(directory + filename):
-        df = pd.read_csv(filename)
-        return df
-    else:
-        df = new_telco_churn(SQL_query)
-        
-        #want to save to csv
-        df.to_csv(filename)
-        return df
+    return df 
 
-# SQL_query = """select * 
-                    #from customers
-                    #join contract_types using (contract_type_id)
-                    #join internet_service_types using (internet_service_type_id)
-                    #join payment_types using (payment_type_id)"""
-#directory = '/Users/andrewcasey/codeup-data-science/classification_exercises'
+
