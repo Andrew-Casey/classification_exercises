@@ -38,26 +38,25 @@ def prep_telco():
     # Drop unnecessary columns
     telco.drop(columns=['internet_service_type_id','contract_type_id','payment_type_id'])
 
-   #Encode 
+def prep_telco():
+    # Load the telco data
+    telco = acq.get_telco_churn()
+    # Drop unnecessary columns
+    telco.drop(columns=['internet_service_type_id','contract_type_id','payment_type_id'])
+
+    #Encode 
     telco['gender_encoded'] = telco['gender'].replace({'Female': 0, 'Male': 1})
     telco['senior_citizen_encoded'] = (telco['senior_citizen'] == 1).astype(int)
     telco['partner_encoded'] = telco['partner'].replace({'Yes': 1, 'No': 0})
     telco['dependents_encoded'] = telco['dependents'].replace({'Yes': 1, 'No': 0})
     telco['phone_service_encoded'] = telco['phone_service'].replace({'Yes': 1, 'No': 0})
-    telco['online_security_encoded'] = telco['online_security'].replace({'Yes': 1, 'No': 0})
-    telco['online_backup_encoded'] = telco['online_backup'].replace({'Yes': 1, 'No': 0})
-    telco['tech_support_encoded'] = telco['tech_support'].replace({'Yes': 1, 'No': 0})
-    telco['streaming_tv_encoded'] = telco['streaming_tv'].replace({'Yes': 1, 'No': 0})
-    telco['streaming_movies_encoded'] = telco['streaming_movies'].replace({'Yes': 1, 'No': 0})
     telco['paperless_billing_encoded'] = telco['paperless_billing'].replace({'Yes': 1, 'No': 0})
     telco['churn_encoded'] = telco['churn'].replace({'Yes': 1, 'No': 0})
-    
+
     #dummy variables
-    dummy_cols = ['contract_type','internet_service_type','payment_type', 'multiple_lines']
+    dummy_cols = ['contract_type','internet_service_type','payment_type', 'multiple_lines', 'online_security','online_backup','device_protection','tech_support','streaming_tv','streaming_movies']
     dummy_df = pd.get_dummies(telco[dummy_cols], dummy_na=False)
     telco = pd.concat([telco, dummy_df], axis=1)
-
-    return telco
 
 #split iris
 def split_data(df):
