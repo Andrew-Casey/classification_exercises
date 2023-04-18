@@ -6,11 +6,6 @@ import os
 import env
 
 
-# get db url
-def get_db_url(database, user=env.user, password=env.password, host_name=env.host_name):
-    url = f'mysql+pymysql://{user}:{password}@{host_name}/{database}'
-    return url
-
 
 def check_file_exists(fn, query, url):
     """
@@ -44,6 +39,7 @@ def get_iris_data():
             '''
     filename = 'iris.csv'
     df = check_file_exists(filename, query, url)
+    
     return df
 
 

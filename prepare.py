@@ -1,3 +1,7 @@
+import acquire as acq
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
 def prep_iris():
 
     #Load the iris data
@@ -10,7 +14,7 @@ def prep_iris():
     iris = iris.rename(columns={'species_name': 'species'})
 
     # Create dummy variables for the species column
-    dummy_df = pd.get_dummies(iris['species'], dummy_na=False)
+    dummy_df = pd.get_dummies(iris['species'], drop_first=True)
     iris = pd.concat([iris, dummy_df], axis=1)
 
     return iris
@@ -26,17 +30,11 @@ def prep_titanic():
    
     # Create dummy variables
     dummy_cols = ['sex', 'embarked']
-    dummy_df = pd.get_dummies(titanic[dummy_cols], dummy_na=False)
+    dummy_df = pd.get_dummies(titanic[dummy_cols], drop_first=True)
     titanic = pd.concat([titanic, dummy_df], axis=1)
 
     return titanic
 
-
-def prep_telco():
-    # Load the telco data
-    telco = acq.get_telco_churn()
-    # Drop unnecessary columns
-    telco.drop(columns=['internet_service_type_id','contract_type_id','payment_type_id'])
 
 def prep_telco():
     # Load the telco data
@@ -52,49 +50,25 @@ def prep_telco():
     telco['phone_service_encoded'] = telco['phone_service'].replace({'Yes': 1, 'No': 0})
     telco['paperless_billing_encoded'] = telco['paperless_billing'].replace({'Yes': 1, 'No': 0})
     telco['churn_encoded'] = telco['churn'].replace({'Yes': 1, 'No': 0})
+    telco['total_charges'] = telco['total_charges'].replace(' ', 0).astype(float)
 
     #dummy variables
     dummy_cols = ['contract_type','internet_service_type','payment_type', 'multiple_lines', 'online_security','online_backup','device_protection','tech_support','streaming_tv','streaming_movies']
-    dummy_df = pd.get_dummies(telco[dummy_cols], dummy_na=False)
+    dummy_df = pd.get_dummies(telco[dummy_cols], drop_first=True)
     telco = pd.concat([telco, dummy_df], axis=1)
 
-#split iris
-def split_data(df):
+    return telco
+#split function
+def split_data(df, target):
     '''
-    take in a DataFrame and return train, validate, and test DataFrames; stratify on survived.
+    take in a DataFrame and target variable. return train, validate, and test DataFrames; stratify on target variable.
     return train, validate, test DataFrames.
     '''
-    train_validate, test = train_test_split(df, test_size=.2, random_state=123, stratify=df.species)
+    train_validate, test = train_test_split(df, test_size=.2, random_state=123, stratify=df[target])
     train, validate = train_test_split(train_validate, 
                                        test_size=.25, 
                                        random_state=123, 
-                                       stratify=train_validate.species)
-    return train, validate, test
-
-#split titanic
-def split_data(df):
-    '''
-    take in a DataFrame and return train, validate, and test DataFrames; stratify on survived.
-    return train, validate, test DataFrames.
-    '''
-    train_validate, test = train_test_split(df, test_size=.2, random_state=123, stratify=df.survived)
-    train, validate = train_test_split(train_validate, 
-                                       test_size=.25, 
-                                       random_state=123, 
-                                       stratify=train_validate.survived)
-    return train, validate, test
-
-#split telco
-def split_data(df):
-    '''
-    take in a DataFrame and return train, validate, and test DataFrames; stratify on survived.
-    return train, validate, test DataFrames.
-    '''
-    train_validate, test = train_test_split(df, test_size=.2, random_state=123, stratify=df.churn)
-    train, validate = train_test_split(train_validate, 
-                                       test_size=.3, 
-                                       random_state=123, 
-                                       stratify=train_validate.churn)
+                                       stratify=train_validate[target])
     return train, validate, test
 
 
