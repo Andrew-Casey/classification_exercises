@@ -26,8 +26,9 @@ def prep_titanic():
     titanic = acq.get_titanic_data()
     
     # Drop unnecessary columns
-    titanic = titanic.drop(columns=['deck', 'embark_town', 'class', 'age'])
-   
+    titanic = titanic.drop(columns=['deck', 'embark_town', 'class'])
+    #change pclass to an object
+    #titanic['pclass'] = titanic['pclass'].astype(object)
     # Create dummy variables
     dummy_cols = ['sex', 'embarked']
     dummy_df = pd.get_dummies(titanic[dummy_cols], drop_first=True)
